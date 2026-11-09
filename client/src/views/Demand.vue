@@ -1,78 +1,76 @@
 <template>
-  <div class="demand">
-    <div class="page-header">
-      <h2>{{ t('demand.title') }}</h2>
-      <p>{{ t('demand.description') }}</p>
+  <div class="space-y-6">
+    <div>
+      <h2 class="page-title">{{ t('demand.title') }}</h2>
+      <p class="page-subtitle">{{ t('demand.description') }}</p>
     </div>
 
     <div v-if="loading" class="loading">{{ t('common.loading') }}</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-    <div v-else>
-      <div class="demand-trend-cards">
-        <div class="trend-card increasing-card">
-          <div class="trend-header">
-            <div class="trend-icon">↑</div>
+    <div v-else-if="error" class="rounded-control bg-red-50 p-4 text-sm text-red-700">{{ error }}</div>
+    <div v-else class="space-y-6">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="card p-6">
+          <div class="mb-4 flex items-center gap-4 border-b border-slate-100 pb-4">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-emerald-50 text-xl font-bold text-emerald-600">↑</div>
             <div>
-              <div class="trend-label">{{ t('demand.increasingDemand') }}</div>
-              <div class="trend-count">{{ t('demand.itemsCount', { count: getForecastsByTrend('increasing').length }) }}</div>
+              <div class="text-sm text-slate-500">{{ t('demand.increasingDemand') }}</div>
+              <div class="text-2xl font-semibold tabular-nums tracking-tight text-slate-900">{{ t('demand.itemsCount', { count: getForecastsByTrend('increasing').length }) }}</div>
             </div>
           </div>
-          <div class="trend-items">
-            <div v-for="item in getForecastsByTrend('increasing').slice(0, 5)" :key="item.id" class="trend-item">
-              <span class="item-name">{{ item.item_name }}</span>
-              <span class="item-change">+{{ getChangePercent(item) }}%</span>
+          <div class="flex flex-col gap-2">
+            <div v-for="item in getForecastsByTrend('increasing').slice(0, 5)" :key="item.id" class="flex items-center justify-between rounded-control bg-slate-50 px-3 py-2 hover:bg-slate-100">
+              <span class="mr-4 flex-1 truncate text-sm font-medium text-slate-900">{{ item.item_name }}</span>
+              <span class="shrink-0 text-xs font-semibold tabular-nums text-emerald-600">{{ getChangePercent(item) }}%</span>
             </div>
-            <div v-if="getForecastsByTrend('increasing').length > 5" class="more-items">
+            <div v-if="getForecastsByTrend('increasing').length > 5" class="p-2 text-center text-xs text-slate-500">
               +{{ getForecastsByTrend('increasing').length - 5 }} {{ t('demand.more') }}
             </div>
           </div>
         </div>
 
-        <div class="trend-card stable-card">
-          <div class="trend-header">
-            <div class="trend-icon">→</div>
+        <div class="card p-6">
+          <div class="mb-4 flex items-center gap-4 border-b border-slate-100 pb-4">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-sky-50 text-xl font-bold text-sky-600">→</div>
             <div>
-              <div class="trend-label">{{ t('demand.stableDemand') }}</div>
-              <div class="trend-count">{{ t('demand.itemsCount', { count: getForecastsByTrend('stable').length }) }}</div>
+              <div class="text-sm text-slate-500">{{ t('demand.stableDemand') }}</div>
+              <div class="text-2xl font-semibold tabular-nums tracking-tight text-slate-900">{{ t('demand.itemsCount', { count: getForecastsByTrend('stable').length }) }}</div>
             </div>
           </div>
-          <div class="trend-items">
-            <div v-for="item in getForecastsByTrend('stable').slice(0, 5)" :key="item.id" class="trend-item">
-              <span class="item-name">{{ item.item_name }}</span>
-              <span class="item-change neutral">{{ getChangePercent(item) }}%</span>
+          <div class="flex flex-col gap-2">
+            <div v-for="item in getForecastsByTrend('stable').slice(0, 5)" :key="item.id" class="flex items-center justify-between rounded-control bg-slate-50 px-3 py-2 hover:bg-slate-100">
+              <span class="mr-4 flex-1 truncate text-sm font-medium text-slate-900">{{ item.item_name }}</span>
+              <span class="shrink-0 text-xs font-semibold tabular-nums text-slate-500">{{ getChangePercent(item) }}%</span>
             </div>
-            <div v-if="getForecastsByTrend('stable').length > 5" class="more-items">
+            <div v-if="getForecastsByTrend('stable').length > 5" class="p-2 text-center text-xs text-slate-500">
               +{{ getForecastsByTrend('stable').length - 5 }} {{ t('demand.more') }}
             </div>
           </div>
         </div>
 
-        <div class="trend-card decreasing-card">
-          <div class="trend-header">
-            <div class="trend-icon">↓</div>
+        <div class="card p-6">
+          <div class="mb-4 flex items-center gap-4 border-b border-slate-100 pb-4">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-control bg-red-50 text-xl font-bold text-red-600">↓</div>
             <div>
-              <div class="trend-label">{{ t('demand.decreasingDemand') }}</div>
-              <div class="trend-count">{{ t('demand.itemsCount', { count: getForecastsByTrend('decreasing').length }) }}</div>
+              <div class="text-sm text-slate-500">{{ t('demand.decreasingDemand') }}</div>
+              <div class="text-2xl font-semibold tabular-nums tracking-tight text-slate-900">{{ t('demand.itemsCount', { count: getForecastsByTrend('decreasing').length }) }}</div>
             </div>
           </div>
-          <div class="trend-items">
-            <div v-for="item in getForecastsByTrend('decreasing').slice(0, 5)" :key="item.id" class="trend-item">
-              <span class="item-name">{{ item.item_name }}</span>
-              <span class="item-change">{{ getChangePercent(item) }}%</span>
+          <div class="flex flex-col gap-2">
+            <div v-for="item in getForecastsByTrend('decreasing').slice(0, 5)" :key="item.id" class="flex items-center justify-between rounded-control bg-slate-50 px-3 py-2 hover:bg-slate-100">
+              <span class="mr-4 flex-1 truncate text-sm font-medium text-slate-900">{{ item.item_name }}</span>
+              <span class="shrink-0 text-xs font-semibold tabular-nums text-red-600">{{ getChangePercent(item) }}%</span>
             </div>
-            <div v-if="getForecastsByTrend('decreasing').length > 5" class="more-items">
+            <div v-if="getForecastsByTrend('decreasing').length > 5" class="p-2 text-center text-xs text-slate-500">
               +{{ getForecastsByTrend('decreasing').length - 5 }} {{ t('demand.more') }}
             </div>
           </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">{{ t('demand.demandForecasts') }}</h3>
-        </div>
-        <div class="table-container">
-          <table>
+      <div class="card overflow-hidden">
+        <h3 class="px-6 pb-4 pt-6 text-base font-semibold">{{ t('demand.demandForecasts') }}</h3>
+        <div class="overflow-x-auto">
+          <table class="data-table">
             <thead>
               <tr>
                 <th>{{ t('demand.table.sku') }}</th>
@@ -86,17 +84,17 @@
             </thead>
             <tbody>
               <tr v-for="forecast in forecasts" :key="forecast.id">
-                <td><strong>{{ forecast.item_sku }}</strong></td>
+                <td class="font-semibold text-slate-900">{{ forecast.item_sku }}</td>
                 <td>{{ forecast.item_name }}</td>
                 <td>{{ forecast.current_demand }}</td>
-                <td><strong>{{ forecast.forecasted_demand }}</strong></td>
+                <td class="font-semibold text-slate-900">{{ forecast.forecasted_demand }}</td>
                 <td>
-                  <span :style="{ color: getChangeColor(forecast) }">
+                  <span class="font-medium" :style="{ color: getChangeColor(forecast) }">
                     {{ getChangePercent(forecast) }}%
                   </span>
                 </td>
                 <td>
-                  <span :class="['badge', forecast.trend]">
+                  <span :class="{ increasing: 'badge-success', stable: 'badge-info', decreasing: 'badge-danger' }[forecast.trend] || 'badge-neutral'">
                     {{ t(`trends.${forecast.trend}`) }}
                   </span>
                 </td>
@@ -222,148 +220,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.demand-trend-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.trend-card {
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 1.5rem;
-  transition: all 0.2s ease;
-}
-
-.trend-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.increasing-card {
-  border-left: 4px solid #10b981;
-}
-
-.stable-card {
-  border-left: 4px solid #3b82f6;
-}
-
-.decreasing-card {
-  border-left: 4px solid #ef4444;
-}
-
-.trend-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.trend-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  font-size: 1.75rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.increasing-card .trend-icon {
-  background: #d1fae5;
-  color: #059669;
-}
-
-.stable-card .trend-icon {
-  background: #dbeafe;
-  color: #2563eb;
-}
-
-.decreasing-card .trend-icon {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.trend-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.trend-count {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-top: 0.25rem;
-}
-
-.trend-items {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.trend-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0.75rem;
-  background: #f8fafc;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-
-.trend-item:hover {
-  background: #f1f5f9;
-}
-
-.item-name {
-  font-size: 0.875rem;
-  color: #0f172a;
-  font-weight: 500;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-right: 1rem;
-}
-
-.item-change {
-  font-size: 0.813rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.increasing-card .item-change {
-  color: #059669;
-}
-
-.stable-card .item-change {
-  color: #3b82f6;
-}
-
-.decreasing-card .item-change {
-  color: #dc2626;
-}
-
-.item-change.neutral {
-  color: #64748b;
-}
-
-.more-items {
-  font-size: 0.813rem;
-  color: #64748b;
-  font-style: italic;
-  text-align: center;
-  padding: 0.5rem;
-}
-</style>

@@ -1,20 +1,38 @@
 <template>
-  <div class="reports">
-    <div class="page-header">
-      <h2>Performance Reports</h2>
-      <p>View quarterly performance metrics and monthly trends</p>
+  <div class="space-y-6">
+    <div>
+      <h2 class="page-title">Performance Reports</h2>
+      <p class="page-subtitle">View quarterly performance metrics and monthly trends</p>
     </div>
 
     <div v-if="loading" class="loading">Loading reports...</div>
-    <div v-else-if="error" class="error">{{ error }}</div>
-    <div v-else>
-      <!-- Quarterly Performance -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Quarterly Performance</h3>
+    <div v-else-if="error" class="rounded-control bg-red-50 p-4 text-sm text-red-700">{{ error }}</div>
+    <div v-else class="space-y-6">
+      <!-- Summary Stats -->
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="card p-5">
+          <div class="text-sm text-slate-500">Total Revenue (YTD)</div>
+          <div class="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-slate-900">${{ formatNumber(totalRevenue) }}</div>
         </div>
-        <div class="table-container">
-          <table class="reports-table">
+        <div class="card p-5">
+          <div class="text-sm text-slate-500">Avg Monthly Revenue</div>
+          <div class="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-slate-900">${{ formatNumber(avgMonthlyRevenue) }}</div>
+        </div>
+        <div class="card p-5">
+          <div class="text-sm text-slate-500">Total Orders (YTD)</div>
+          <div class="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-slate-900">{{ totalOrders }}</div>
+        </div>
+        <div class="card p-5">
+          <div class="text-sm text-slate-500">Best Performing Quarter</div>
+          <div class="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-slate-900">{{ bestQuarter }}</div>
+        </div>
+      </div>
+
+      <!-- Quarterly Performance -->
+      <div class="card overflow-hidden">
+        <h3 class="px-6 pb-4 pt-6 text-base font-semibold">Quarterly Performance</h3>
+        <div class="overflow-x-auto">
+          <table class="data-table">
             <thead>
               <tr>
                 <th>Quarter</th>
@@ -25,8 +43,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(q, index) in quarterlyData" :key="index">
-                <td><strong>{{ q.quarter }}</strong></td>
+              <tr v-for="q in quarterlyData" :key="q.quarter">
+                <td class="font-semibold text-slate-900">{{ q.quarter }}</td>
                 <td>{{ q.total_orders }}</td>
                 <td>${{ formatNumber(q.total_revenue) }}</td>
                 <td>${{ formatNumber(q.avg_order_value) }}</td>
@@ -42,33 +60,27 @@
       </div>
 
       <!-- Monthly Trends Chart -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Monthly Revenue Trend</h3>
-        </div>
-        <div class="chart-container">
-          <div class="bar-chart">
-            <div v-for="(month, index) in monthlyData" :key="index" class="bar-wrapper">
-              <div class="bar-container">
-                <div
-                  class="bar"
-                  :style="{ height: getBarHeight(month.revenue) + 'px' }"
-                  :title="'$' + formatNumber(month.revenue)"
-                ></div>
-              </div>
-              <div class="bar-label">{{ formatMonth(month.month) }}</div>
+      <div class="card p-6">
+        <h3 class="mb-4 text-base font-semibold">Monthly Revenue Trend</h3>
+        <div class="flex min-h-[300px] items-end justify-around gap-2 px-2 pb-10 pt-6">
+          <div v-for="month in monthlyData" :key="month.month" class="flex max-w-[80px] flex-1 flex-col items-center">
+            <div class="flex h-[200px] w-full items-end">
+              <div
+                class="w-full cursor-pointer rounded-t-md bg-indigo-500 transition-colors hover:bg-indigo-600"
+                :style="{ height: getBarHeight(month.revenue) + 'px' }"
+                :title="'$' + formatNumber(month.revenue)"
+              ></div>
             </div>
+            <div class="mt-6 -rotate-45 whitespace-nowrap text-center text-xs text-slate-500">{{ formatMonth(month.month) }}</div>
           </div>
         </div>
       </div>
 
       <!-- Month-over-Month Comparison -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Month-over-Month Analysis</h3>
-        </div>
-        <div class="table-container">
-          <table class="reports-table">
+      <div class="card overflow-hidden">
+        <h3 class="px-6 pb-4 pt-6 text-base font-semibold">Month-over-Month Analysis</h3>
+        <div class="overflow-x-auto">
+          <table class="data-table">
             <thead>
               <tr>
                 <th>Month</th>
@@ -79,8 +91,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(month, index) in monthlyData" :key="index">
-                <td><strong>{{ formatMonth(month.month) }}</strong></td>
+              <tr v-for="(month, index) in monthlyData" :key="month.month">
+                <td class="font-semibold text-slate-900">{{ formatMonth(month.month) }}</td>
                 <td>{{ month.order_count }}</td>
                 <td>${{ formatNumber(month.revenue) }}</td>
                 <td>
@@ -98,26 +110,6 @@
               </tr>
             </tbody>
           </table>
-        </div>
-      </div>
-
-      <!-- Summary Stats -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-label">Total Revenue (YTD)</div>
-          <div class="stat-value">${{ formatNumber(totalRevenue) }}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Avg Monthly Revenue</div>
-          <div class="stat-value">${{ formatNumber(avgMonthlyRevenue) }}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Total Orders (YTD)</div>
-          <div class="stat-value">{{ totalOrders }}</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">Best Performing Quarter</div>
-          <div class="stat-value">{{ bestQuarter }}</div>
         </div>
       </div>
     </div>
@@ -272,11 +264,11 @@ export default {
 
     getFulfillmentClass(rate) {
       if (rate >= 90) {
-        return 'badge success'
+        return 'badge-success'
       } else if (rate >= 75) {
-        return 'badge warning'
+        return 'badge-warning'
       } else {
-        return 'badge danger'
+        return 'badge-danger'
       }
     },
 
@@ -294,9 +286,9 @@ export default {
     getChangeClass(current, previous) {
       var change = current - previous
       if (change > 0) {
-        return 'positive-change'
+        return 'font-semibold text-emerald-600'
       } else if (change < 0) {
-        return 'negative-change'
+        return 'font-semibold text-red-600'
       } else {
         return ''
       }
@@ -315,174 +307,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-.reports {
-  padding: 0;
-}
-
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-  margin-bottom: 1.5rem;
-}
-
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #0f172a;
-  margin: 0;
-}
-
-.reports-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.reports-table th {
-  background: #f8fafc;
-  padding: 0.75rem;
-  text-align: left;
-  font-weight: 600;
-  color: #64748b;
-  border-bottom: 2px solid #e2e8f0;
-}
-
-.reports-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.reports-table tr:hover {
-  background: #f8fafc;
-}
-
-.chart-container {
-  padding: 2rem 1rem;
-  min-height: 300px;
-}
-
-.bar-chart {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  height: 250px;
-  gap: 0.5rem;
-}
-
-.bar-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-  max-width: 80px;
-}
-
-.bar-container {
-  height: 200px;
-  display: flex;
-  align-items: flex-end;
-  width: 100%;
-}
-
-.bar {
-  width: 100%;
-  background: linear-gradient(to top, #3b82f6, #60a5fa);
-  border-radius: 4px 4px 0 0;
-  transition: all 0.3s;
-  cursor: pointer;
-}
-
-.bar:hover {
-  background: linear-gradient(to top, #2563eb, #3b82f6);
-}
-
-.bar-label {
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
-  color: #64748b;
-  text-align: center;
-  transform: rotate(-45deg);
-  white-space: nowrap;
-  margin-top: 1.5rem;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-left: 4px solid #3b82f6;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: #64748b;
-  margin-bottom: 0.5rem;
-}
-
-.stat-value {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.badge.success {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.badge.warning {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.badge.danger {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.positive-change {
-  color: #16a34a;
-  font-weight: 600;
-}
-
-.negative-change {
-  color: #dc2626;
-  font-weight: 600;
-}
-
-.loading {
-  text-align: center;
-  padding: 3rem;
-  color: #64748b;
-}
-
-.error {
-  background: #fee2e2;
-  color: #991b1b;
-  padding: 1rem;
-  border-radius: 8px;
-  margin: 1rem 0;
-}
-</style>

@@ -30,15 +30,20 @@ Use the Task tool with these specialized subagents for appropriate tasks:
 
 ## Quick Start
 
+Run each server in its own terminal:
+
 ```bash
-# Backend
+# Backend (FastAPI, http://localhost:8001, docs at /docs) - requires uv
 cd server
+uv venv && uv sync
 uv run python main.py
 
-# Frontend
+# Frontend (Vite, http://localhost:3000)
 cd client
 npm install && npm run dev
 ```
+
+`./scripts/start.sh` / `./scripts/stop.sh` start/stop both on macOS/Linux; on Windows use the manual commands above.
 
 ## Key Patterns
 
@@ -68,7 +73,10 @@ npm install && npm run dev
 - Styles: `client/src/App.vue`
 
 ## Design System
-- Colors: Slate/gray (#0f172a, #64748b, #e2e8f0)
-- Status: green/blue/yellow/red
-- Charts: Custom SVG, CSS Grid for layouts
+- Styling: Tailwind CSS 3 utilities first; tokens in `client/tailwind.config.js`, shared classes in `client/src/style.css` (`.card`, `.btn-primary/-secondary/-ghost`, `.input`, `.badge-success/info/warning/danger/neutral`, `.data-table`, `.modal-backdrop/-panel/-close`, `.page-title`, `.loading`, `.error`). Avoid new scoped CSS.
+- Colors: Slate neutrals (#0f172a text, #64748b muted, #e2e8f0 borders, #f8fafc page), indigo accent (#4f46e5)
+- Typography: Inter (loaded in `client/index.html`), tabular numbers for figures
+- Layout: left sidebar + top bar with filters, content max-width 1400px
+- Status: emerald/sky/amber/red (soft `.badge-*` chips); status colors only for status
+- Charts: Custom SVG and CSS bars, indigo primary series, slate secondary
 - No emojis in UI
